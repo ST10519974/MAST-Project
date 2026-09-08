@@ -1,26 +1,26 @@
 import { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, TouchableHighlight } from 'react-native';
 
-// NavigationContainer wraps the whole app and manages navigation state
-import { NavigationContainer } from '@react-navigation/native';
-// createNativeStackNavigator builds a stack-based navigator using native transitions
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-
-const Stack = createNativeStackNavigator();
-
 export default function App() {
+  const [screen, setScreen] = useState<'Home' | 'Game'>('Home');
+  const [players, setPlayers] = useState({ player1: '', player2: '' });
+
   return (
-    <NavigationContainer>
-      <Stack.Navigator initialRouteName="Home">
-        <Stack.Screen name="Home" component={PlayerScreen} />
-        <Stack.Screen name="Game" component={GameScreen} />
-      </Stack.Navigator>
-    </NavigationContainer>
+    screen === 'Home' ? (
+      <PlayerScreen
+        onStart={(player1, player2) => {
+          setPlayers({ player1, player2 });
+          setScreen('Game');
+        }}
+      />
+    ) : (
+      <GameScreen player1={players.player1} player2={players.player2} />
+    )
   );
 }
 
-function PlayerScreen({ navigation }: any){
-    const [player1, setPlayer1] = useState<string>('');
+function PlayerScreen({ onStart }: { onStart: (player1: string, player2: string) => void }){
+  const [player1, setPlayer1] = useState<string>('');
   const [player2, setPlayer2] = useState<string>('');
 
   return (
@@ -42,14 +42,13 @@ function PlayerScreen({ navigation }: any){
 
       <Button
         title="Start Game"
-        onPress={() => navigation.navigate('Game', {player1: player1, player2: player2})}
+        onPress={() => onStart(player1, player2)}
       />
     </View>
   );
 }
 
-function GameScreen({ navigation, route} : any){
-  const { player1, player2 } = route.params; 
+function GameScreen({ player1, player2 }: { player1: string; player2: string }){
   const [player1Turn, setPlayer1Turn] = useState<boolean>(true);
 
   // Each block holds one of three values:
